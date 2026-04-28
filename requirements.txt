@@ -1,0 +1,5 @@
+yt-dlp
+assemblyai
+moviepy
+python-dotenv
+requests
