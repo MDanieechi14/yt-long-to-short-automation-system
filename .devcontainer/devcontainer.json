@@ -1,0 +1,13 @@
+{
+  "name": "YT Short Automation",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "python -m venv venv && source venv/bin/activate && pip install -r requirements.txt",
+  "postStartCommand": "source venv/bin/activate",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/workspaces/yt-long-to-short-automation-system/venv/bin/python"
+      }
+    }
+  }
+}
