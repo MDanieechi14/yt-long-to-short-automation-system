@@ -4,31 +4,42 @@ from src.transcriber.transcriber import transcribe_video
 from src.clipper.clip_detector import detect_clips
 from src.clipper.video_slicer import slice_clips
 from src.captioner.captioner import add_captions
+import threading
+import uuid
 
 app = Flask(__name__)
 
-@app.route("/process", methods=["POST"])
-def process():
-    data = request.json
-    url = data.get("url")
+jobs = {}
 
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
-
+def run_pipeline(job_id: str, url: str):
     try:
+        jobs[job_id] = {"status": "processing"}
         video_path = download_video(url)
         transcript = transcribe_video(video_path)
         clips = detect_clips(transcript)
         clip_paths = slice_clips(video_path, clips)
         captioned = [add_captions(p, transcript) for p in clip_paths]
-
-        return jsonify({
-            "status": "success",
-            "clips": captioned
-        })
-
+        jobs[job_id] = {"status": "done", "clips": captioned}
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        jobs[job_id] = {"status": "error", "error": str(e)}
+
+@app.route("/process", methods=["POST"])
+def process():
+    data = request.json
+    url = data.get("url")
+    if not url:
+        return jsonify({"error": "No URL provided"}), 400
+    job_id = str(uuid.uuid4())
+    thread = threading.Thread(target=run_pipeline, args=(job_id, url))
+    thread.start()
+    return jsonify({"job_id": job_id, "status": "started"})
+
+@app.route("/status/<job_id>", methods=["GET"])
+def status(job_id):
+    job = jobs.get(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+    return jsonify(job)
 
 @app.route("/health", methods=["GET"])
 def health():
