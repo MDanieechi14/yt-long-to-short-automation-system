@@ -3,3 +3,4 @@ assemblyai
 moviepy
 python-dotenv
 requests
+flask
