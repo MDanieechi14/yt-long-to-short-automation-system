@@ -2,14 +2,11 @@ import yt_dlp
 import os
 
 def download_video(url: str, output_dir: str = "output") -> str:
-    """
-    Downloads a YouTube video and returns the file path.
-    """
     os.makedirs(output_dir, exist_ok=True)
 
     ydl_opts = {
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]",
-        "outtmpl": f"{output_dir}/%(title)s.%(ext)s",
+        "format": "worst[ext=mp4]/worst",  # lowest quality to save memory
+        "outtmpl": f"{output_dir}/%(id)s.%(ext)s",  # shorter filename
         "merge_output_format": "mp4",
     }
 
