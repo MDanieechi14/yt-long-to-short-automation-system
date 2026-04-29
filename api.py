@@ -4,46 +4,36 @@ from src.transcriber.transcriber import transcribe_video
 from src.clipper.clip_detector import detect_clips
 from src.clipper.video_slicer import slice_clips
 from src.captioner.captioner import add_captions
-import threading
-import uuid
 
 app = Flask(__name__)
 
-jobs = {}
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"})
 
-def run_pipeline(job_id: str, url: str):
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
+    url = data.get("url")
+    if not url:
+        return jsonify({"error": "No URL provided"}), 400
+    
     try:
-        jobs[job_id] = {"status": "processing"}
+        print(f"Starting processing for: {url}")
         video_path = download_video(url)
         transcript = transcribe_video(video_path)
         clips = detect_clips(transcript)
         clip_paths = slice_clips(video_path, clips)
         captioned = [add_captions(p, transcript) for p in clip_paths]
-        jobs[job_id] = {"status": "done", "clips": captioned}
+
+        return jsonify({
+            "status": "success",
+            "clips": captioned,
+            "message": "Processing completed successfully"
+        })
     except Exception as e:
-        jobs[job_id] = {"status": "error", "error": str(e)}
-
-@app.route("/process", methods=["POST"])
-def process():
-    data = request.json
-    url = data.get("url")
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
-    job_id = str(uuid.uuid4())
-    thread = threading.Thread(target=run_pipeline, args=(job_id, url))
-    thread.start()
-    return jsonify({"job_id": job_id, "status": "started"})
-
-@app.route("/status/<job_id>", methods=["GET"])
-def status(job_id):
-    job = jobs.get(job_id)
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-    return jsonify(job)
-
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"})
+        print(f"Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
