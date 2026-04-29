@@ -1,4 +1,4 @@
-def detect_clips(transcript, clip_duration: int = 45, max_clips: int = 1) -> list:
+def detect_clips(transcript, clip_duration: int = 20, max_clips: int = 1) -> list:
     """
     Splits transcript into equal time-based chunks as clips.
     """
