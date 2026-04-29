@@ -4,3 +4,4 @@ moviepy
 python-dotenv
 requests
 flask
+gunicorn
