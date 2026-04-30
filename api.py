@@ -1,11 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from src.downloader.downloader import download_video
 from src.transcriber.transcriber import transcribe_video
 from src.clipper.clip_detector import detect_clips
 from src.clipper.video_slicer import slice_clips
 import traceback
+import os
 
 app = Flask(__name__)
+
+BASE_URL = "https://yt-long-to-short-automation-system.onrender.com"
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -27,10 +30,24 @@ def process():
         print(f"Detected: {len(clips)} clips")
         clip_paths = slice_clips(video_path, clips)
         print(f"Sliced: {clip_paths}")
-        return jsonify({"status": "done", "clips": clip_paths})
+
+        # Return full downloadable URLs
+        clip_urls = [
+            f"{BASE_URL}/clips/{os.path.basename(p)}"
+            for p in clip_paths
+        ]
+
+        return jsonify({"status": "done", "clips": clip_urls})
     except Exception as e:
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+
+@app.route("/clips/<filename>", methods=["GET"])
+def serve_clip(filename):
+    file_path = f"output/clips/{filename}"
+    if not os.path.exists(file_path):
+        return jsonify({"error": "File not found"}), 404
+    return send_file(file_path, mimetype="video/mp4")
 
 @app.route("/routes", methods=["GET"])
 def routes():
