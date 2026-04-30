@@ -2,30 +2,30 @@ import os
 import subprocess
 
 def slice_clips(video_path: str, clips: list, output_dir: str = "output/clips") -> list:
-    """
-    Slices a video into clips using ffmpeg directly (memory efficient).
-    Returns list of output file paths.
-    """
     os.makedirs(output_dir, exist_ok=True)
-
     output_paths = []
 
     for i, clip in enumerate(clips):
         start = clip["start"]
         end = clip["end"]
         duration = end - start
-        label = clip["text"].replace(" ", "_")[:20]
-        output_path = f"{output_dir}/clip_{i+1}_{label}.mp4"
+        output_path = f"{output_dir}/clip_{i+1}.mp4"
 
-        print(f"✂️  Slicing clip {i+1}: {start}s → {end}s ({clip['text']})")
+        print(f"✂️  Slicing clip {i+1}: {start}s → {end}s")
 
         command = [
             "ffmpeg", "-y",
             "-ss", str(start),
             "-i", video_path,
             "-t", str(duration),
+            "-vf", "scale=320:-2",      # tiny resolution
+            "-r", "15",                  # low framerate
             "-c:v", "libx264",
+            "-preset", "ultrafast",      # lowest CPU/memory usage
+            "-crf", "35",               # lower quality = less memory
             "-c:a", "aac",
+            "-b:a", "64k",              # low audio bitrate
+            "-threads", "1",            # single thread to save memory
             "-loglevel", "error",
             output_path
         ]
