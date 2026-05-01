@@ -34,6 +34,28 @@ Google Sheets (updated with clip URL) ✅
 
 ---
 
+## 📸 Screenshots
+
+### n8n Workflow Overview
+![Workflow Overview](screenshots/Workflow-overview-final.png)
+
+### Workflow Execution (All nodes green ✅)
+![Workflow Execution](screenshots/Workflow-execution.png)
+
+### Google Sheets Input & Output
+![Google Sheets](screenshots/google-sheets-input-output.png)
+
+### API Health Check
+![API Health](screenshots/API-health-check.png)
+
+### Downloaded Clip
+![Downloaded Clip](screenshots/downloaded-clip.png)
+
+### YouTube Shorts Draft
+![YouTube Draft](screenshots/YouTube-shorts-draft.png)
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
@@ -61,6 +83,7 @@ yt-long-to-short-automation-system/
 │   ├── clipper/          # clip detection + ffmpeg slicing
 │   ├── captioner/        # caption burning (local only)
 │   └── uploader/         # YouTube upload (via n8n)
+├── screenshots/          # portfolio screenshots
 ├── output/               # generated clips (gitignored)
 ├── api.py                # Flask REST API
 ├── main.py               # local pipeline runner
@@ -162,3 +185,4 @@ python api.py
 
 ## 👤 Author
 Built by [@MDanieechi14](https://github.com/MDanieechi14) as a portfolio project for AI automation / workflow engineering roles.
+EOF
